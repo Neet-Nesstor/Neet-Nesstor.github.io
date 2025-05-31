@@ -1,78 +1,424 @@
 <!DOCTYPE html>
-<html style="height: 100%;">
+<html lang="en" style="height: 100%;">
 <head>
-<meta name="viewport" content="width=device-width, minimum-scale=0.1">
-<style>
-  body {
-    margin: 0;
-    height: 100%;
-    background-color: rgb(14, 14, 14);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  img {
-    max-width: 90%;
-    max-height: 90%;
-    display: none;
-  }
-  .controls {
-    margin-top: 20px;
-  }
-  button {
-    margin: 0 5px;
-    padding: 8px 16px;
-    font-size: 16px;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🔥</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; height: 100%;
+      overflow: hidden;
+      background-color: #0e0e0e;
+      font-family: sans-serif;
+      color: white;
+    }
+    #start-screen {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      background: #0e0e0e; z-index: 100;
+    }
+    #start-screen.hidden { display: none; }
+
+    #image-wrapper {
+      width: 90%; max-width: 1600px; margin: 0 auto;
+      padding-top: 60px;
+      height: calc(100% - 140px);
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    #image-container {
+      width: 100%; flex: 1; position: relative;
+    }
+    #image-container img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+      transition: opacity 0.8s ease;
+      position: absolute; top: 0; left: 0;
+    }
+
+    .progress-container {
+      height: 8px;
+      background: #333;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 12px;
+      width: 100%;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #0af;
+      transition: width 0.1s linear;
+    }
+
+    .controls {
+      position: absolute; bottom: 20px;
+      left: 0; right: 0;
+      display: flex; justify-content: center; gap: 10px;
+      z-index: 50;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      border: none; border-radius: 25px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white; cursor: pointer;
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+    #start {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 15px 40px; font-size: 22px;
+    }
+    #end {
+      position: fixed; top: 20px; right: 20px;
+      z-index: 10;
+      background: rgba(255, 80, 80, 0.2);
+    }
+  </style>
 </head>
 <body>
 
-<img src="https://el.phncdn.com/gif/51331971.gif" width="392" height="220">
-<img src="https://via.placeholder.com/400x300/ff7f7f/ffffff?text=Image+2">
-<img src="https://via.placeholder.com/400x300/7f7fff/ffffff?text=Image+3">
-
-<div class="controls">
+<div id="start-screen">
   <button id="start">Start</button>
-  <button id="prev" disabled>قبلی</button>
-  <button id="next" disabled>بعدی</button>
 </div>
 
+<div id="image-wrapper">
+  <div id="image-container"></div>
+  <div class="progress-container" id="progress-container">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+</div>
+
+<div class="controls" style="display: none;">
+  <button id="prev">Previous</button>
+  <button id="next">Next</button>
+</div>
+
+<button id="end" style="display: none;">End</button>
+
 <script>
-  const images = document.querySelectorAll('img');
+   const images = [
+    {
+      preview: 'https://ei.phncdn.com/videos/202408/28/457066131/original/(m=q56T-SZbeaAaGwObaaaa)(mh=AYoMCdHRRkohdjtn)0.jpg',
+      full: 'https://el.phncdn.com/gif/50071251.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202409/03/457330161/original/(m=q0IMXTZbeaAaGwObaaaa)(mh=uHXAqxfoUnOa09M-)0.jpg',
+      full: 'https://el.phncdn.com/gif/50071241.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202409/04/457337121/original/(m=qS29JUZbeaAaGwObaaaa)(mh=a5N32Be8FKhwePUN)0.jpg',
+      full: 'https://el.phncdn.com/gif/50071211.gif'
+    },
+    {
+      preview: 'https://thumb-nss.xhcdn.com/a/LAafqIKiaWZOMMc5rF9ZcQ/025/606/664/1280x720.17339059.jpg',
+      full: 'https://el.phncdn.com/gif/50791761.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202412/04/461400371/original/(m=q3JNH1ZbeaAaGwObaaaa)(mh=BdWesaOYYfcAPNSN)0.jpg',
+      full: 'https://el.phncdn.com/gif/50791771.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202501/03/462693871/original/(m=qXM-W3ZbeaAaGwObaaaa)(mh=H65pIEIDeGglwXTg)0.jpg',
+      full: 'https://el.phncdn.com/gif/50997611.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202409/04/457361001/original/(m=q6HI7UZbeaAaGwObaaaa)(mh=3OvjGtjd_ROsgF6y)0.jpg',
+      full: 'https://el.phncdn.com/gif/50126401.gif'
+    },
+    {
+      preview: 'https://ic-vt-nss.xhcdn.com/a/YWVlYzYyZjFmOWIyOThkYzExNjc1ODBlNWNiYjU0MmI/s(w:1280,h:720),webp/026/452/360/1280x720.17462749.jpg',
+      full: 'https://el.phncdn.com/gif/52014711.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202504/27/467846045/original/(m=q_0P9G0beaAaGwObaaaa)(mh=1BCZxVJ40I3lBDo8)0.jpg',
+      full: 'https://el.phncdn.com/gif/51915341.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202409/11/457620991/original/(m=qG9SJUZbeaAaGwObaaaa)(mh=nqfTkifBtEg8cBci)0.jpg',
+      full: 'https://el.phncdn.com/gif/50158951.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202502/05/464172535/original/(m=q9R4N6ZbeaAaGwObaaaa)(mh=AVFxXr__6WOa9m6P)0.jpg',
+      full: 'https://el.phncdn.com/gif/51331971.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202502/22/464904965/original/(m=qYKX37ZbeaAaGwObaaaa)(mh=lwGffu9lk2jIScyK)0.jpg',
+      full: 'https://el.phncdn.com/gif/51630821.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202502/26/465076525/original/(m=qWQWM8ZbeaAaGwObaaaa)(mh=JtyJ9mjYqQzeP2cg)0.jpg',
+      full: 'https://el.phncdn.com/gif/51717041.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202503/13/465709355/original/(m=qNVRN9ZbeaAaGwObaaaa)(mh=urGFeRbbDyBrVKvj)0.jpg',
+      full: 'https://el.phncdn.com/gif/51717071.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202503/18/465929035/original/(m=q_-2J_ZbeaAaGwObaaaa)(mh=gvG0akgkphd50Z4O)0.jpg',
+      full: 'https://el.phncdn.com/gif/51717101.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202503/23/466179865/original/(m=qLNQH_ZbeaAaGwObaaaa)(mh=6EHuQrNi7g6usVO2)0.jpg',
+      full: 'https://el.phncdn.com/gif/51635091.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202503/23/466213845/original/(m=qY7KJ_ZbeaAaGwObaaaa)(mh=fMUDPMFu9sELe8j1)0.jpg',
+      full: 'https://el.phncdn.com/gif/51717121.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202410/01/458545271/original/(m=qLLV_VZbeaAaGwObaaaa)(mh=dGM3O9-U5nbyddGi)0.jpg',
+      full: 'https://el.phncdn.com/gif/50386581.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202410/01/458546001/original/(m=q_TVMWZbeaAaGwObaaaa)(mh=kJ9LbOic4EquZPd7)0.jpg',
+      full: 'https://el.phncdn.com/gif/50386611.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202410/09/458906721/original/(m=qGZ1TWZbeaAaGwObaaaa)(mh=eRbrUaoieLDbUmoX)0.jpg',
+      full: 'https://el.phncdn.com/gif/50386621.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202410/09/458907071/original/(m=q2U2TWZbeaAaGwObaaaa)(mh=XKSnTRf6flA5NlYP)0.jpg',
+      full: 'https://el.phncdn.com/gif/50386641.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202410/09/458907331/original/(m=qSQ1YWZbeaAaGwObaaaa)(mh=O_YwhMIrgebMSbCf)0.jpg',
+      full: 'https://el.phncdn.com/gif/50406021.gif'
+    },
+    {
+      preview: 'https://thumb-nss.xhcdn.com/a/DEqZaJlNc1N94XCh0i6PLQ/025/798/144/1280x720.17364104.jpg',
+      full: 'https://el.phncdn.com/gif/51039031.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202409/11/457621311/original/(m=qJ_SJUZbeaAaGwObaaaa)(mh=Z6xvH_othH_HOJae)0.jpg',
+      full: 'https://el.phncdn.com/gif/50203261.gif'
+    },
+    {
+      preview: 'https://thumb-nss.xhcdn.com/a/BZQKHeyEWdoP9MCKTdtiUw/025/658/237/1280x720.17349241.jpg',
+      full: 'https://el.phncdn.com/gif/47811941.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202411/07/460172031/original/(m=q-1T4YZbeaAaGwObaaaa)(mh=3ekn7F3FjAGkx6TV)0.jpg',
+      full: 'https://el.phncdn.com/gif/50614211.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202411/08/460257211/original/(m=qWJTTZZbeaAaGwObaaaa)(mh=iQi6WWf9aSlufA4c)0.jpg',
+      full: 'https://el.phncdn.com/gif/50614201.gif'
+    },
+    {
+      preview: 'https://thumb-nss.xhcdn.com/a/JMOZ_vK6qZ3mm-l8IRru3g/025/499/415/1280x720.17321311.jpg',
+      full: 'https://el.phncdn.com/gif/50669501.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202411/08/460257811/original/(m=q8S09YZbeaAaGwObaaaa)(mh=ybwTwtlC6QpTsm5-)0.jpg',
+      full: 'https://el.phncdn.com/gif/50669551.gif'
+    },
+    {
+      preview: 'https://thumb-nss.xhcdn.com/a/7-oLqw8gCAC3znpi45vQAQ/025/581/625/1280x720.17331964.jpg',
+      full: 'https://el.phncdn.com/gif/50698061.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202410/27/459721591/original/(m=qG1O-XZbeaAaGwObaaaa)(mh=aiekmMz0g9uBUg2A)0.jpg',
+      full: 'https://el.phncdn.com/gif/50480971.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202410/23/459548561/original/(m=q-_YYXZbeaAaGwObaaaa)(mh=zjalYkgVt7oYzM5u)0.jpg',
+      full: 'https://el.phncdn.com/gif/50480681.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202410/23/459548931/original/(m=qGIT4YZbeaAaGwObaaaa)(mh=1uWb9-mj1ATs4Ay9)0.jpg',
+      full: 'https://el.phncdn.com/gif/50521541.gif'
+    },
+    {
+      preview: 'https://thumb-nss.xhcdn.com/a/n9UA8tw4WowhbpSqfhFVzQ/025/928/483/1280x720.17386113.jpg',
+      full: 'https://el.phncdn.com/gif/51253051.gif'
+    },
+    {
+      preview: 'https://ic-vt-nss.xhcdn.com/a/MjNkMjFhODliZmVlZGZkNDkwM2ExMjEyNDRhYmU2Yzg/s(w:1280,h:720),webp/026/452/380/1280x720.17459634.jpg',
+      full: 'https://el.phncdn.com/gif/51960161.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202502/05/464170865/original/(m=q-VRO6ZbeaAaGwObaaaa)(mh=r8XJhFFlJ5bzv7b8)0.jpg',
+      full: 'https://el.phncdn.com/gif/51307881.gif'
+    },
+    {
+      preview: 'https://ic-vt-nss.xhcdn.com/a/MGNmOTNhNTJhNGQ4YTJiYjYzNTAwNzQ5ZjQ5MDVjYTI/s(w:1280,h:720),webp/026/551/057/1280x720.17472715.jpg',
+      full: 'https://el.phncdn.com/gif/52075421.gif'
+    },
+    {
+      preview: 'https://ic-vt-nss.xhcdn.com/a/NTZiZGRiNWRjNzM4NmZkYzc1OWRlZTFkOGI3YmYyODc/s(w:2560,h:1440),webp/026/580/962/v2/2560x1440.230.webp',
+      full: 'https://el.phncdn.com/gif/52120662.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202504/20/467541755/original/(m=qN-ZRG0beaAaGwObaaaa)(mh=nRevoaSV8B8iPMkJ)0.jpg',
+      full: 'https://el.phncdn.com/gif/51889711.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202504/05/466817165/original/(m=q_2RI-ZbeaAaGwObaaaa)(mh=IeD5j0dSztrwVKEs)0.jpg',
+      full: 'https://el.phncdn.com/gif/51778651.gif'
+    },
+    {
+      preview: 'https://ei.phncdn.com/videos/202504/11/467101265/original/(m=qWK6Y-ZbeaAaGwObaaaa)(mh=CMpHhT9x38aBaEgM)0.jpg',
+      full: 'https://el.phncdn.com/gif/51778631.gif'
+    },
+    {
+      preview: 'https://ic-vt-nss.xhcdn.com/a/Mjk3YzZmZTIwOTBiMTgzMjJmNDZlNjBhNmNlNTczMTM/s(w:1280,h:720),webp/026/362/766/1280x720.17452407.jpg',
+      full: 'https://el.phncdn.com/gif/51825741.gif'
+    }
+  ];
+
+  const imageContainer = document.getElementById('image-container');
+  const progressContainer = document.getElementById('progress-container');
+  const progressBar = document.getElementById('progress-bar');
+
   const startBtn = document.getElementById('start');
   const prevBtn = document.getElementById('prev');
   const nextBtn = document.getElementById('next');
-  let currentIndex = -1;
+  const endBtn = document.getElementById('end');
+  const controls = document.querySelector('.controls');
+  const startScreen = document.getElementById('start-screen');
+
+  let currentIndex = 0;
+  let imageCache = {};
+  let progressStates = {};
 
   startBtn.addEventListener('click', () => {
-    if (images.length > 0) {
-      currentIndex = 0;
-      updateImageDisplay();
-      prevBtn.disabled = false;
-      nextBtn.disabled = false;
-      startBtn.disabled = true;
-    }
+    startScreen.classList.add('hidden');
+    controls.style.display = 'flex';
+    endBtn.style.display = 'inline-block';
+    showImage(currentIndex);
+  });
+
+  endBtn.addEventListener('click', () => {
+    controls.style.display = 'none';
+    startScreen.classList.remove('hidden');
+    endBtn.style.display = 'none';
+    progressContainer.style.opacity = '0';
+    imageContainer.innerHTML = '';
   });
 
   prevBtn.addEventListener('click', () => {
     if (currentIndex > 0) {
       currentIndex--;
-      updateImageDisplay();
+      showImage(currentIndex);
     }
   });
 
   nextBtn.addEventListener('click', () => {
     if (currentIndex < images.length - 1) {
       currentIndex++;
-      updateImageDisplay();
+      showImage(currentIndex);
     }
   });
 
-  function updateImageDisplay() {
-    images.forEach((img, index) => {
-      img.style.display = index === currentIndex ? 'block' : 'none';
+  function showImage(index) {
+    const { preview, full } = images[index];
+    imageContainer.innerHTML = '';
+
+    const previewImg = new Image();
+    previewImg.src = preview;
+    previewImg.style.opacity = '1';
+    imageContainer.appendChild(previewImg);
+
+    if (imageCache[index]) {
+      const fullImg = imageCache[index];
+      fullImg.style.opacity = '1';
+      imageContainer.appendChild(fullImg);
+      progressContainer.style.opacity = '0';
+      return;
+    }
+
+    if (progressStates[index]?.blobUrl) {
+      const fullImg = new Image();
+      fullImg.src = progressStates[index].blobUrl;
+      fullImg.style.opacity = '1';
+      imageContainer.appendChild(fullImg);
+      imageCache[index] = fullImg;
+      progressContainer.style.opacity = '0';
+      return;
+    }
+
+    if (progressStates[index]?.downloading) {
+      progressContainer.style.opacity = '1';
+      progressBar.style.width = `${progressStates[index]?.percent || 0}%`;
+      return;
+    }
+
+    progressStates[index] = { percent: 0, downloading: true };
+    progressBar.style.width = `0%`;
+    progressContainer.style.opacity = '1';
+
+    fetchWithProgress(full, percent => {
+      if (percent > progressStates[index].percent) {
+        progressStates[index].percent = percent;
+        if (currentIndex === index) {
+          progressBar.style.width = `${percent}%`;
+        }
+      }
+    }).then(blobUrl => {
+      progressStates[index].blobUrl = blobUrl;
+      progressStates[index].downloading = false;
+      if (currentIndex === index) {
+        const fullImg = new Image();
+        fullImg.src = blobUrl;
+        fullImg.style.opacity = '1';
+        imageContainer.appendChild(fullImg);
+        imageCache[index] = fullImg;
+        progressContainer.style.opacity = '0';
+      }
+
+      if (index + 1 < images.length && !progressStates[index + 1]) {
+        const nextFull = images[index + 1].full;
+        progressStates[index + 1] = { percent: 0, downloading: true };
+
+        fetchWithProgress(nextFull, percent => {
+          if (percent > progressStates[index + 1].percent) {
+            progressStates[index + 1].percent = percent;
+          }
+        }).then(blobUrl => {
+          progressStates[index + 1].blobUrl = blobUrl;
+          progressStates[index + 1].downloading = false;
+        });
+      }
+
+    });
+  }
+
+  function fetchWithProgress(url, onProgress) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.responseType = 'blob';
+      xhr.open('GET', url, true);
+      let maxPercent = 0;
+
+      xhr.onprogress = event => {
+        if (event.lengthComputable) {
+          const percent = Math.floor((event.loaded / event.total) * 100);
+          if (percent > maxPercent) {
+            maxPercent = percent;
+            onProgress(maxPercent);
+          }
+        }
+      };
+
+      xhr.onload = () => {
+        const blobUrl = URL.createObjectURL(xhr.response);
+        resolve(blobUrl);
+      };
+
+      xhr.onerror = reject;
+      xhr.send();
     });
   }
 </script>
