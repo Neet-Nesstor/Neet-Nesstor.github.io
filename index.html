@@ -1,1 +1,81 @@
-<img style="display: block; user-select: none; margin: auto; cursor: zoom-in; background-color: rgb(230, 230, 230); --darkreader-inline-bgcolor: var(--darkreader-background-e6e6e6, #26292b);" src="https://el.phncdn.com/gif/51331971.gif" data-darkreader-inline-bgcolor="" width="392" height="220">
+<!DOCTYPE html>
+<html style="height: 100%;">
+<head>
+<meta name="viewport" content="width=device-width, minimum-scale=0.1">
+<style>
+  body {
+    margin: 0;
+    height: 100%;
+    background-color: rgb(14, 14, 14);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  img {
+    max-width: 90%;
+    max-height: 90%;
+    display: none;
+  }
+  .controls {
+    margin-top: 20px;
+  }
+  button {
+    margin: 0 5px;
+    padding: 8px 16px;
+    font-size: 16px;
+  }
+</style>
+</head>
+<body>
+
+<img src="https://el.phncdn.com/gif/51331971.gif" width="392" height="220">
+<img src="https://via.placeholder.com/400x300/ff7f7f/ffffff?text=Image+2">
+<img src="https://via.placeholder.com/400x300/7f7fff/ffffff?text=Image+3">
+
+<div class="controls">
+  <button id="start">Start</button>
+  <button id="prev" disabled>قبلی</button>
+  <button id="next" disabled>بعدی</button>
+</div>
+
+<script>
+  const images = document.querySelectorAll('img');
+  const startBtn = document.getElementById('start');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  let currentIndex = -1;
+
+  startBtn.addEventListener('click', () => {
+    if (images.length > 0) {
+      currentIndex = 0;
+      updateImageDisplay();
+      prevBtn.disabled = false;
+      nextBtn.disabled = false;
+      startBtn.disabled = true;
+    }
+  });
+
+  prevBtn.addEventListener('click', () => {
+    if (currentIndex > 0) {
+      currentIndex--;
+      updateImageDisplay();
+    }
+  });
+
+  nextBtn.addEventListener('click', () => {
+    if (currentIndex < images.length - 1) {
+      currentIndex++;
+      updateImageDisplay();
+    }
+  });
+
+  function updateImageDisplay() {
+    images.forEach((img, index) => {
+      img.style.display = index === currentIndex ? 'block' : 'none';
+    });
+  }
+</script>
+
+</body>
+</html>
